@@ -1,0 +1,56 @@
+Number of joysticks:  1
+Joystick names:
+DualSense Wireless Controller
+Number of axes:  6
+Axis names and initial values:
+Axis 0 : 0.0 Left Stick X axis
+Axis 1 : 0.0 Left Stick Y axis
+Axis 2 : 0.0 Left Trigger
+Axis 3 : 0.0 Right Stick X axis
+Axis 4 : 0.0 Right Stick Y axis
+Axis 5 : 0.0 Right Trigger
+Number of buttons:  17
+Button names:
+Button 0 : 0 Cross
+Button 1 : 0 Circle
+Button 2 : 0 Square
+Button 3 : 0 Triangle
+Button 4 : 0 Share
+Button 5 : 0 Playstation
+Button 6 : 0 Option
+Button 7 : 0 Left Stick In
+Button 8 : 0 Right Stick In
+Button 9 : 0 Left Bumper
+Button 10 : 0 Right Bumper
+Button 11 : 0 Hat Up
+Button 12 : 0 Hat Down
+Button 13 : 0 Hat Left
+Button 14 : 0 Hat Right
+Button 15 : 0 Touchpad
+Button 16 : 0 Power
+
+Modbus Map
+
+0  : Left Stick X axis
+1  : Left Stick Y axis
+2  : Left Trigger
+3  : Right Stick X axis
+4  : Right Stick Y axis
+5  : Right Trigger
+6  : Cross
+7  : Circle
+8  : Square
+9  : Triangle
+10 : Share
+11 : Playstation
+12 : Option
+13 : Left Stick In
+14 : Right Stick In
+15 : Left Bumper
+16 : Right Bumper
+17 : Hat Up
+18 : Hat Down
+19 : Hat Left
+20 : Hat Right
+21 : Touchpad
+22 : Power

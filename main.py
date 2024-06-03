@@ -3,22 +3,37 @@ import pygame
 from pyModbusTCP.server import ModbusServer, DataBank
 import threading
 
-# Initialize pygame and joystick
-pygame.init()
-pygame.joystick.init()
-joystick = pygame.joystick.Joystick(0)
-joystick.init()
+BUTTON_NAMES_PS5_DUALSENSE = {
+    0: "Cross",
+    1: "Cirlce",
+    2: "Square",
+    3: "Triangle",
+    4: "Share",
+    5: "Playstation",
+    6: "Option",
+    7: "L Stick",
+    8: "R Stick",
+    9: "L Bumper",
+    10: "R Bumper",
+    11: "Hat Up",
+    12: "Hat Down",
+    13: "Hat Left",
+    14: "Hat Right",
+    15: "Touchpad",
+    16: "Power",
+}
 
-# Modbus server configuration
-SERVER_HOST = '192.168.29.210'  # Change this to your server's IP address
-SERVER_PORT = 502
-server = ModbusServer(host=SERVER_HOST, port=SERVER_PORT, no_block=True)
-
-# Start the Modbus server
-server.start()
+AXIS_NAMES_PS5_DUALSENSE = {
+    0: "Left Stick X",
+    1: "Left Stick Y",
+    2: "Left Trigger",
+    3: "Right Stick X",
+    4: "Right Stick Y",
+    5: "Right Trigger",
+}
 
 # Button names for Xbox 360 controller
-BUTTON_NAMES = {
+BUTTON_NAMES_XBOX_360 = {
     0: "A",
     1: "B",
     2: "X",
@@ -43,85 +58,99 @@ BUTTON_NAMES = {
     # Add more buttons as needed
 }
 
-# Function to update Modbus registers with joystick data
-def update_registers():
-    while True:
-        # Read joystick data
-        axis_values = [int(joystick.get_axis(i) * 100) for i in range(joystick.get_numaxes())]
-        button_values = [int(joystick.get_button(i)) for i in range(joystick.get_numbuttons())]
-        hat_values = [hat_val for hat_val in joystick.get_hat(0)]  # Assuming there's only one hat on the joystick
-        values = axis_values + button_values + hat_values
+BUTTON_NAMES = BUTTON_NAMES_PS5_DUALSENSE
+AXIS_NAMES = AXIS_NAMES_PS5_DUALSENSE
 
-        # Update Modbus holding registers using instance method
-        server.data_bank.set_holding_registers(0, values)
+if __name__ == "__main__":
 
-        # Delay to avoid overwhelming the system
-        time.sleep(0.500)
+    # Initialize pygame and joystick
+    pygame.init()
+    pygame.joystick.init()
 
-# Start the thread to update Modbus registers
-update_thread = threading.Thread(target=update_registers)
-update_thread.start()
+    #get count of joysticks
+    if pygame.joystick.get_count() == 0:
+        print("No joysticks found.")
+        quit()
+    else:
+        print("Number of joysticks: ", pygame.joystick.get_count())
+        print("Joystick names:")
+        for i in range(pygame.joystick.get_count()):
+            print(pygame.joystick.Joystick(i).get_name())
 
+    joystick = pygame.joystick.Joystick(0)
+    #get axis count, names, and initial values
+    num_axes = joystick.get_numaxes()
+    print("Number of axes: ", num_axes)
+    print("Axis names and initial values:")
+    for i in range(num_axes):
+        print("Axis", i, ":", joystick.get_axis(i))
 
+    #get button count and names
+    num_buttons = joystick.get_numbuttons()
+    print("Number of buttons: ", num_buttons)
+    print("Button names:")
+    for i in range(num_buttons):
+        print("Button", i, ":", joystick.get_button(i))
 
+    joystick.init()
 
-# Define button names
-BUTTON_NAMES = {
-    0: "ButtonA",
-    1: "ButtonB",
-    2: "ButtonX",
-    3: "ButtonY",
-    4: "LeftShoulder",
-    5: "RightShoulder",
-    6: "LeftTrigger",
-    7: "RightTrigger",
-    8: "Back",
-    9: "Start",
-    10: "LeftStick",
-    11: "RightStick",
-    12: "DPadUp",
-    13: "DPadDown",
-    14: "DPadLeft",
-    15: "DPadRight"
-}
+    # Modbus server configuration
+    SERVER_HOST = '10.1.10.33'  # Change this to your server's IP address
+    SERVER_PORT = 502
+    server = ModbusServer(host=SERVER_HOST, port=SERVER_PORT, no_block=True)
 
-# Initialize variables to store button, axis, and hat values
-button_values = {}
-axis_values = {}
-hat_values = {}
-rsb_x_value = 0.0  # Initialize Right Stick X axis value
-rsb_y_value = 0.0  # Initialize Right Stick Y axis value
+    # Start the Modbus server
+    server.start()
 
-# Main loop to handle events
-try:
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.JOYBUTTONDOWN:
-                button_index = event.button
-                button_name = BUTTON_NAMES.get(button_index, "Unknown")
-                button_value = joystick.get_button(button_index)
-                button_values[button_name] = button_value
-                print("Button Values:", button_values)
-                
-            elif event.type == pygame.JOYAXISMOTION:
-                axis_index = event.axis
-                axis_value = joystick.get_axis(axis_index)
-                
-                # Assuming Right Stick's X and Y axes are indexed at 3 and 4 respectively
-                if axis_index == 3:  # Right Stick X axis
-                    rsb_x_value = axis_value
-                elif axis_index == 4:  # Right Stick Y axis
-                    rsb_y_value = axis_value
+    # Function to update Modbus registers with joystick data
+    def update_registers():
+        while True:
+            # Read joystick data
+            axis_values = [int(joystick.get_axis(i) * 100) for i in range(joystick.get_numaxes())]
+            button_values = [int(joystick.get_button(i)) for i in range(joystick.get_numbuttons())]
+            values = axis_values + button_values
+
+            # Update Modbus holding registers using instance method
+            server.data_bank.set_holding_registers(0, values)
+
+            # Delay to avoid overwhelming the system
+            print("Values:", values)
+            time.sleep(0.500)
+
+    # Start the thread to update Modbus registers
+    update_thread = threading.Thread(target=update_registers)
+    update_thread.start()
+
+    # Initialize variables to store button and axis values
+    button_values = {}
+    axis_values = {}
+    rsb_x_value = 0.0  # Initialize Right Stick X axis value
+    rsb_y_value = 0.0  # Initialize Right Stick Y axis value
+
+    # Main loop to handle events
+    try:
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.JOYBUTTONDOWN:
+                    button_index = event.button
+                    button_name = BUTTON_NAMES.get(button_index, "Unknown")
+                    button_value = joystick.get_button(button_index)
+                    button_values[button_name] = button_value
+                    #print(f"[button_index: {button_index}, button_name: {button_name}, button_value: {button_value}]")
                     
-                print("Right Stick X Value:", rsb_x_value)
-                print("Right Stick Y Value:", rsb_y_value)
-                
-            elif event.type == pygame.JOYHATMOTION:
-                hat_index = event.hat
-                hat_name = "Hat " + str(hat_index)
-                hat_value = joystick.get_hat(hat_index)
-                hat_values[hat_name] = hat_value
-                print("Hat Values:", hat_values)
-                
-except KeyboardInterrupt:
-    pygame.quit()
+                elif event.type == pygame.JOYAXISMOTION:
+                    axis_index = event.axis
+                    axis_value = joystick.get_axis(axis_index)
+                    
+                    # Assuming Right Stick's X and Y axes are indexed at 3 and 4 respectively
+                    if axis_index == 3:  # Right Stick X axis
+                        rsb_x_value = axis_value
+                    elif axis_index == 4:  # Right Stick Y axis
+                        rsb_y_value = axis_value
+
+                    #print(f"[axis_index: {axis_index}, axis_value: {axis_value}]")   
+                    #print("Right Stick X Value:", rsb_x_value)
+                    #print("Right Stick Y Value:", rsb_y_value)
+                    
+    except KeyboardInterrupt:
+        pygame.quit()
